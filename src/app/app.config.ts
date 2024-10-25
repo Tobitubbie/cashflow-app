@@ -17,11 +17,11 @@ export const appConfig: ApplicationConfig = {
     ),
     {
       provide: APPLICATION_ID,
-      useValue: 'aaaa-bbbbbb-cccccc-dddd',
+      useValue: '2ee9c6c8-5758-4cbc-b7b7-59d6c2904274',
     },
     {
       provide: REDIRECT_URL,
-      useValue: 'http://localhost:4000/auth',
+      useValue: 'http://localhost:4000/redirect',
     },
   ]
 };

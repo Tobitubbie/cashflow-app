@@ -10,16 +10,30 @@ export type StartAuthorizationResponse = {
 }
 
 /**
-* Response data of an authorized user session.
+* Response data of a successfully created authorized user session.
 *
 * @see https://enablebanking.com/docs/api/reference/#authorizesessionresponse
 */
 export type AuthorizeSessionResponse = {
     session_id: string;
-    accounts: AccountResource[];
-    aspsp: ASPSP;
-    psu_type: "business"|"personal";
-    access: {valid_until: string};
+    // further props can be omitted,
+    //  because session-data will be (re)loaded via "/sessions/:id"
+    //
+    // accounts: AccountResource[];
+    // aspsp: ASPSP;
+    // psu_type: "business"|"personal";
+    // access: {valid_until: string};
+}
+
+/**
+ * Response data of session information.
+ *
+ * @see https://enablebanking.com/docs/api/reference/#getsessionresponse
+ */
+export type GetSessionResponse = {
+  status: 'AUTHORIZED' | 'CANCELLED' | 'CLOSED' | 'EXPIRED' | 'INVALID' | 'PENDING_AUTHORIZATION' | 'RETURNED_FROM_BANK' | 'REVOKED';
+  accounts: string[]; // array of account-ids
+  aspsp: ASPSP,
 }
 
 /**

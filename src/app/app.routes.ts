@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { AppComponent } from './app.component';
-import { AuthComponent } from './auth/auth.component';
+import {authGuardGuard} from './auth/auth-guard.guard';
+import {RedirectComponent} from './auth/redirect/redirect.component';
+import {SecureComponent} from './secure/secure.component';
 
 export const routes: Routes = [
   {
@@ -8,7 +10,12 @@ export const routes: Routes = [
     component: AppComponent,
   },
   {
-    path: 'auth',
-    component: AuthComponent,
+    path: 'redirect',
+    component: RedirectComponent,
   },
+  {
+    path: 'secure',
+    canActivate: [authGuardGuard],
+    component: SecureComponent,
+  }
 ];

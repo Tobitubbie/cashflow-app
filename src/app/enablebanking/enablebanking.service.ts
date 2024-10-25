@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import { AuthorizeSessionResponse, StartAuthorizationResponse } from '../models';
+import {AuthorizeSessionResponse, GetSessionResponse, StartAuthorizationResponse} from '../models';
 
 
 export const APPLICATION_ID = new InjectionToken<string>("applicationId");
@@ -16,6 +16,10 @@ export class EnablebankingService {
   applicationId: string = inject(APPLICATION_ID);
   redirectUrl: string = inject(REDIRECT_URL);
 
+  // TODO: support deep-linking
+  //  -> add "redirectRoute" (string) param
+  //  -> route: where to route after auth-flow is finished
+  //  -> store route
   startUserAuth(expireDays: number = 10) {
     const hardcodedBank = {
       name: 'VR Bank Bamberg-Forchheim',
@@ -41,9 +45,12 @@ export class EnablebankingService {
   /**
    * Creates a new user session.
    * @param {string} code Code added as query parameter during redirection of user authentication
-   * @returns {Observable<AuthorizeSessionResponse>}
    */
   createSession(code: string) {
     return this.http.post<AuthorizeSessionResponse>(`enablebanking/sessions`, { code });
+  }
+
+  getSessionData(sessionId: string) {
+    return this.http.get<GetSessionResponse>(`enablebanking/sessions/${sessionId}`);
   }
 }

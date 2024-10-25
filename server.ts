@@ -1,10 +1,10 @@
-import { APP_BASE_HREF } from '@angular/common';
-import { CommonEngine } from '@angular/ssr';
+import {APP_BASE_HREF} from '@angular/common';
+import {CommonEngine} from '@angular/ssr';
 import express from 'express';
-import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {dirname, join, resolve} from 'node:path';
 import bootstrap from './src/main.server';
-import { configDotenv } from 'dotenv';
+import {configDotenv} from 'dotenv';
 import jwa from 'jwa';
 
 // load dotenv file into process.env
@@ -54,9 +54,8 @@ export function app(): express.Express {
   server.use(express.json());
 
   // Proxy requests from "/enablebanking" to "https://api.enablebanking.com"
-  server.post('/enablebanking/**', async (req, res, next) => {
-
-    console.log("PROXY", req.url, req.baseUrl, req.originalUrl)
+  server.all('/enablebanking/**', async (req, res, _next) => {
+    console.log("Proxy Intercept");
 
     const forwardedHeaders = new Headers();
     for (const key in req.headers) {
@@ -69,7 +68,6 @@ export function app(): express.Express {
     }
 
     const targetUrl = req.url.replace('/enablebanking', 'https://api.enablebanking.com');
-    console.log("PROXY original req", req.body);
 
     return fetch(targetUrl, {
       method: req.method,
@@ -79,17 +77,16 @@ export function app(): express.Express {
         // TODO: not working yet...
         // ...forwardedHeaders,
       },
-      body: JSON.stringify(req.body),
+      ...(req.method !== 'GET') && {body: JSON.stringify(req.body)},
     })
-    .then(async proxiedResponse => {
-      console.log("PROXIED response", proxiedResponse);
-      return res.status(proxiedResponse.status).send(await proxiedResponse.json())
-    })
-    .catch(error => {
-      console.error(error);
-      return res.status(500).send({ message: 'Error in custom proxy' });
-    });
-  });
+      .then(async proxiedResponse => {
+        return res.status(proxiedResponse.status).send(await proxiedResponse.json())
+      })
+      .catch(error => {
+        console.error(error);
+        return res.status(500).send({message: 'Error in custom proxy'});
+      });
+  })
 
   // Serve static files from /browser
   server.get('**', express.static(browserDistFolder, {
@@ -101,7 +98,7 @@ export function app(): express.Express {
   server.get('**', (req, res, next) => {
     console.log("GET **");
 
-    const { protocol, originalUrl, baseUrl, headers } = req;
+    const {protocol, originalUrl, baseUrl, headers} = req;
 
     commonEngine
       .render({
@@ -109,7 +106,7 @@ export function app(): express.Express {
         documentFilePath: indexHtml,
         url: `${protocol}://${headers.host}${originalUrl}`,
         publicPath: browserDistFolder,
-        providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
+        providers: [{provide: APP_BASE_HREF, useValue: baseUrl}],
       })
       .then((html) => res.send(html))
       .catch((err) => next(err));
