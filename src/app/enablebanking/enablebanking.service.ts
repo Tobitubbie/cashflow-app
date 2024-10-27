@@ -12,14 +12,9 @@ export const REDIRECT_URL = new InjectionToken<string>("redirectUrl");
 export class EnablebankingService {
 
   http = inject(HttpClient);
-
   applicationId: string = inject(APPLICATION_ID);
   redirectUrl: string = inject(REDIRECT_URL);
 
-  // TODO: support deep-linking
-  //  -> add "redirectRoute" (string) param
-  //  -> route: where to route after auth-flow is finished
-  //  -> store route
   startUserAuth(expireDays: number = 10) {
     const hardcodedBank = {
       name: 'VR Bank Bamberg-Forchheim',
@@ -50,6 +45,10 @@ export class EnablebankingService {
     return this.http.post<AuthorizeSessionResponse>(`enablebanking/sessions`, { code });
   }
 
+  /**
+   * Gets session data from session-id
+   * @param {string} sessionId id of the current session
+   */
   getSessionData(sessionId: string) {
     return this.http.get<GetSessionResponse>(`enablebanking/sessions/${sessionId}`);
   }

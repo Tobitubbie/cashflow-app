@@ -19,15 +19,19 @@ export class RedirectComponent {
   authCode = toSignal(this.activatedRoute.queryParamMap.pipe(
     map(paramMap => paramMap.get('code') ?? undefined))
   );
-  #onAuthCodeChanges = effect(() => {
-    const code = this.authCode();
-    if (code === undefined) return;
+  constructor() {
+    /* OnAuthCodeChanges - triggers when auth-code changes (+ initially) */
+    effect(() => {
+      const code = this.authCode();
+      if (code === undefined) return;
 
-    this.bankingService.createSession(code)
-      .pipe(take(1))
-      .subscribe(async session => {
-        sessionStorage.setItem('enablebanking_session_id', session.session_id);
-        await this.router.navigate(['/']);
-      });
-  });
+      this.bankingService.createSession(code)
+        .pipe(take(1))
+        .subscribe(async session => {
+          sessionStorage.setItem('enablebanking_session_id', session.session_id);
+          const redirectUrl = sessionStorage.getItem('local_redirect_route') ?? '/';
+          await this.router.navigate([redirectUrl]);
+        });
+    });
+  }
 }
